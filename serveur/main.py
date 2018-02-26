@@ -33,15 +33,19 @@ def main():
 
 	BDD = bdd.init_bdd(args.sql)
 
-	MQTT = mqtt.Client(client_id="Historian", clean_session=False, userdata=None)
+	MQTT = mqtt.Client()
+	#MQTT = mqtt.Client(client_id="historian", clean_session=False)
 	#MQTT.username_pw_set(username, password=None)
-	MQTT.reconnect_delay_set(min_delay=1, max_delay=30)
+	#MQTT.reconnect_delay_set(min_delay=1, max_delay=30)
 
 	MQTT.on_connect = mqtt_cb.on_connect
 	MQTT.on_message = mqtt_cb.on_message
+	MQTT.on_disconnect = mqtt_cb.on_disconnect
+	
 	MQTT.user_data_set(MAIN)
 	
-	MQTT.connect_async(args.mqtt_host, port=args.mqtt_port, keepalive=60)
+	print("Client MQTT pour %s:%s"%(args.mqtt_host, args.mqtt_port))
+	MQTT.connect_async(args.mqtt_host, args.mqtt_port, 60)
 
 	MAIN.bdd = BDD
 	MAIN.mqtt = MQTT
@@ -53,8 +57,9 @@ def main():
 
 	# Serveur REST ici
 
-	rest_class.app.run(debug=True)
+	rest_class.app.run(host='127.0.0.1', port=8080, debug=True)
 	
+
 	MQTT.loop_stop(force=False)
 
 if __name__ == "__main__":
