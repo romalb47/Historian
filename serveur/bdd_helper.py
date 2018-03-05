@@ -27,7 +27,7 @@ def init_table(con):
 		);
 		
 		CREATE TABLE IF NOT EXISTS identifiant(
-			 idx INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+			 idx INTEGER PRIMARY KEY UNIQUE,
 			 topic TEXT
 		);
 		
@@ -41,12 +41,12 @@ def init_table(con):
 		CREATE TABLE IF NOT EXISTS dataset(
 			 id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 			 idd INTEGER,
-			 ide INTEGER,
-			 idx INTEGER
+			 type INTEGER,
+			 ident INTEGER
 		);
 		
 		CREATE TABLE IF NOT EXISTS dataset_info(
-			 idd INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+			 idd INTEGER PRIMARY KEY UNIQUE,
 			 name TEXT
 		);
 		

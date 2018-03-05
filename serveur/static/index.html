@@ -1,36 +1,126 @@
-<script type="text/javascript" language="javascript">
-
-function send()
-{
-    var urlvariable;
-
-    urlvariable = "text";
-
-
-    URL = "http://127.0.0.1:8080/api/v1/curves";  //Your URL
-
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = callbackFunction(xmlhttp);
-    xmlhttp.open("GET", URL, true);
-    xmlhttp.setRequestHeader("Content-Type", "application/json");
- //   xmlhttp.setRequestHeader('Authorization', 'Basic ' + window.btoa('apiusername:apiuserpassword')); //in prod, you should encrypt user name and password and provide encrypted keys here instead 
-	xmlhttp.onreadystatechange = function() {callbackFunction(xmlhttp);} ;
-    xmlhttp.send(null);
-}
-
-function callbackFunction(xmlhttp) 
-{
-	if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-		document.getElementById("div").innerHTML = xmlhttp.statusText + ":" + xmlhttp.status + "<BR><textarea rows='100' cols='100'>" + xmlhttp.responseText + "</textarea>";
-	}
-}
-
-</script>
-
-
+<!DOCTYPE HTML>
 <html>
-<body id='bod'><button type="submit" onclick="javascript:send()">call</button>
-<div id='div'>
+<head>
+<script>
+window.onload = function() {
 
-</div></body>
+var dataPoints = [];
+var stripLines = [];
+
+var ChartIdx = [];
+var ChartIde = [];
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	zoomEnabled: true,
+	animationEnabled: true,
+	theme: "light2",
+	title: {
+		text: "Courbe"
+	},
+	axisY: {
+		title: "Valeur",
+		titleFontSize: 24
+	},
+	axisX:{
+		stripLines: stripLines
+	},
+	data: dataPoints
+});
+
+function addData(data) {
+	var id = -1
+	
+	for (var i = 0; i < dataPoints.length; i++) {
+		if (dataPoints[i].idx == data.idx) {
+			id = i
+		}
+		
+	}
+	
+	if (id == -1) {
+		
+			dataPoints.push( {
+				idx: data.idx,
+				ide: -1,
+				name: data.name,
+				type: "line",
+				showInLegend: true,
+				yValueFormatString: data.format,
+				dataPoints: []
+			} )
+			
+			id = dataPoints.length-1;
+		
+	}
+	
+	dataPoints[id].dataPoints.length = 0;
+	for (var j = 0; j < data.data.length; j++) {
+		dataPoints[id].dataPoints.push({
+			x: new Date(data.data[j].time),
+			y: data.data[j].data
+		});
+	}	
+	
+	
+	chart.render();
+
+}
+
+function addEvent(data) {
+	var id = -1
+	
+	stripLines.lenght = 0
+	
+	for (var j = 0; j < data.data.length; j++) {
+		stripLines.push({
+			value: new Date(data.data[j].time),
+			label: data.data[j].text,
+			labelPlacement:"inside"
+		});
+	}	
+	
+	chart.render();
+
+}
+
+function RefreshPage() {
+	for (var i in ChartIdx) {
+		$.getJSON("http://127.0.0.1:8080/api/v1/curves/"+ChartIdx[i], addData);
+	}
+	for (var i in ChartIde) {
+		$.getJSON("http://127.0.0.1:8080/api/v1/events/"+ChartIde[i], addEvent);
+	}
+
+	setTimeout(RefreshPage, 5000); 
+}
+
+function LoadDataset(data){	
+	for (var i = 0; i < data.data.length; i++) {
+		if (data.data[i].type == 1) {
+			
+			ChartIdx.push(data.data[i].ident)
+		}
+		if (data.data[i].type == 2) {
+			ChartIde.push(data.data[i].ident)
+		}
+		
+	}
+	
+	console.log(ChartIdx);
+	console.log(ChartIde);
+	
+	RefreshPage();
+}
+
+$.getJSON("http://127.0.0.1:8080/api/v1/datasets/10", LoadDataset);
+
+
+}
+</script>
+</head>
+<body>
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+</body>
 </html>

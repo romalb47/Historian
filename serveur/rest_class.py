@@ -29,31 +29,86 @@ class CurvesCollection(Resource):
 		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
 
 	def get(self):
-		data = self.reqparse.parse_args()
-		if data['x-token'] == "SECRET":
-			return("200 Success")
-		data = MainClass.bdd.execute("SELECT idx FROM identifiant").fetchall()
+		c = MainClass.bdd.execute("SELECT idx FROM history GROUP BY idx")
+		data = []
+		for i in c:
+			data.append(i["idx"])
 		return data
-
-	def post(self):
-		pass
-		
 
 class Curves(Resource):
 	def __init__(self):
 		self.reqparse = RequestParser()
 		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
 
-	def get(self, id):
-		data = MainClass.bdd.execute("SELECT * FROM identifiant WHERE idx=?", (id,)).fetchall()
+	def get(self, idc):
+		c = MainClass.bdd.execute("SELECT data, time FROM history WHERE idx=?", (idc,))
+		data_global = {"idx": idc, "name":"ID-"+str(idc), "data":[], "format": "#,#°C"}
+		data = []
+		for i in c:
+			data.append({"data":i["data"], "time":i["time"]})
+		data_global["data"] = data
+		return data_global
+
+	def delete(self, id):
+		return {"msg": "Delete user id {}".format(id)}
+		
+class EventsCollection(Resource):
+	def __init__(self):
+		self.reqparse = RequestParser()
+		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
+
+	def get(self):
+		c = MainClass.bdd.execute("SELECT ide FROM event GROUP BY ide")
+		data = []
+		for i in c:
+			data.append(i["ide"])
 		return data
 
-	def put(self, id):
-		return {"msg": "Update user id {}".format(id)}
+class Events(Resource):
+	def __init__(self):
+		self.reqparse = RequestParser()
+		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
+
+	def get(self, ide):
+		c = MainClass.bdd.execute("SELECT event_text, time FROM event WHERE ide=?", (ide,))
+		data_global = {"ide": ide, "name":"ID-"+str(ide), "data":[]}
+		data = []
+		for i in c:
+			data.append({"text":i["event_text"], "time":i["time"]})
+		data_global["data"] = data
+		return data_global
 
 	def delete(self, id):
 		return {"msg": "Delete user id {}".format(id)}
 
+class DatasetsCollection(Resource):
+	def __init__(self):
+		self.reqparse = RequestParser()
+		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
+
+	def get(self):
+		c = MainClass.bdd.execute("SELECT idd FROM dataset GROUP BY idd")
+		data = []
+		for i in c:
+			data.append(i["idd"])
+		return data
+
+class Datasets(Resource):
+	def __init__(self):
+		self.reqparse = RequestParser()
+		self.reqparse.add_argument('x-token', type=str, location='headers', required=True)
+
+	def get(self, idd):
+		c = MainClass.bdd.execute("SELECT type, ident FROM dataset WHERE idd=?", (idd,))
+		data_global = {"idd": idd, "data":[]}
+		data = []
+		for i in c:
+			data.append({"type":i["type"], "ident":i["ident"]})
+		data_global["data"] = data
+		return data_global
+
+	def delete(self, id):
+		return {"msg": "Delete user id {}".format(id)}
 
 class Users(Resource):
 	def get(self, id):
@@ -66,18 +121,23 @@ class Users(Resource):
 	def delete(self, id):
 		return {"msg": "Delete user id {}".format(id)}
 		
-		
-class Data(Resource):
-	def get(self, idx):
-		c = MainClass.bdd.execute("SELECT data, time FROM history WHERE idx=?", (idx,))
-		time = []
-		value = []
-		for i in c:
-			time.append(i["time"])
-			value.append(i["data"])
-		return {"data": value, "time": time}
+class UsersLogin(Resource):
+	def get(self, id):
+		c = MainClass.bdd.execute("SELECT * FROM identifiant WHERE idx=?", (id,))
+		return data
 
+	def put(self, id):
+		return {"msg": "Update user id {}".format(id)}
+
+	def delete(self, id):
+		return {"msg": "Delete user id {}".format(id)}
 
 api.add_resource(CurvesCollection, '/curves')
-api.add_resource(Curves, '/curves/<int:id>')
-api.add_resource(Data, '/data/<int:idx>')
+api.add_resource(Curves, '/curves/<int:idc>')
+api.add_resource(EventsCollection, '/events')
+api.add_resource(Events, '/events/<int:ide>')
+api.add_resource(DatasetsCollection, '/datasets')
+api.add_resource(Datasets, '/datasets/<int:idd>')
+
+api.add_resource(Users, '/users')
+api.add_resource(UsersLogin, '/users/auth')
