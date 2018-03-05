@@ -7,7 +7,7 @@ import json, sqlite3
 import paho.mqtt.client as mqtt
 
 # import interne
-import bdd, mqtt_cb, main_struct
+import bdd_helper, mqtt_cb, main_struct
 
 import rest_class
 
@@ -16,7 +16,7 @@ def main():
 	parser.add_argument("-c", "--config", help="Config file path", default="./config.json")
 	parser.add_argument("-d", "--debug", help="Debugging mode", action="store_true")
 	
-	parser.add_argument("-s", "--sql", help="SQL Url", default="sqlite://:memory:")
+	parser.add_argument("-s", "--sql", help="SQL Url", default="sqlite://sql.db")
 	
 	parser.add_argument("-m", "--mqtt-host", help="MQTT Broker address", default="127.0.0.1")
 	parser.add_argument("--mqtt-port", help="MQTT Broker port", type=int, default=1883)
@@ -31,7 +31,7 @@ def main():
 
 	MAIN = main_struct.MainClass()
 
-	BDD = bdd.init_bdd(args.sql)
+	BDD = bdd_helper.init_bdd(args.sql)
 
 	MQTT = mqtt.Client()
 	#MQTT = mqtt.Client(client_id="historian", clean_session=False)
@@ -53,14 +53,14 @@ def main():
 
 	rest_class.MainClass = MAIN
 
-	MQTT.loop_start()
+	MAIN.mqtt.loop_start()
 
 	# Serveur REST ici
 
-	rest_class.app.run(host='127.0.0.1', port=8080, debug=True)
+	rest_class.app.run(host='127.0.0.1', port=8080, debug=True, use_reloader=False)
 	
 
-	MQTT.loop_stop(force=False)
+	MAIN.mqtt.loop_stop(force=False)
 
 if __name__ == "__main__":
 	main()

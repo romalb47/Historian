@@ -1,0 +1,36 @@
+<script type="text/javascript" language="javascript">
+
+function send()
+{
+    var urlvariable;
+
+    urlvariable = "text";
+
+
+    URL = "http://127.0.0.1:8080/api/v1/curves";  //Your URL
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = callbackFunction(xmlhttp);
+    xmlhttp.open("GET", URL, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+ //   xmlhttp.setRequestHeader('Authorization', 'Basic ' + window.btoa('apiusername:apiuserpassword')); //in prod, you should encrypt user name and password and provide encrypted keys here instead 
+	xmlhttp.onreadystatechange = function() {callbackFunction(xmlhttp);} ;
+    xmlhttp.send(null);
+}
+
+function callbackFunction(xmlhttp) 
+{
+	if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+		document.getElementById("div").innerHTML = xmlhttp.statusText + ":" + xmlhttp.status + "<BR><textarea rows='100' cols='100'>" + xmlhttp.responseText + "</textarea>";
+	}
+}
+
+</script>
+
+
+<html>
+<body id='bod'><button type="submit" onclick="javascript:send()">call</button>
+<div id='div'>
+
+</div></body>
+</html>

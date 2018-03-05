@@ -21,7 +21,8 @@ def init_table(con):
 	SQL = """
 		CREATE TABLE IF NOT EXISTS history(
 			 id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-			 idx REAL,
+			 idx INTEGER,
+			 data FLOAT,
 			 time TIMESTAMP
 		);
 		
@@ -52,4 +53,6 @@ def init_table(con):
 	"""
 	con.executescript(SQL)
 
-	
+def addHistoryData(con, idx, value):
+	con.execute("""INSERT INTO history(idx, data, time) VALUES(?, ?, DATETIME("now") )""", (int(idx), float(value)))
+	con.commit()
