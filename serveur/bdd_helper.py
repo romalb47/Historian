@@ -27,8 +27,10 @@ def init_table(con):
 		);
 		
 		CREATE TABLE IF NOT EXISTS identifiant(
-			 idx INTEGER PRIMARY KEY UNIQUE,
-			 topic TEXT
+			 idx INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+			 topic TEXT UNIQUE,
+			 name TEXT,
+			 format TEXT
 		);
 		
 		CREATE TABLE IF NOT EXISTS event(
@@ -54,5 +56,20 @@ def init_table(con):
 	con.executescript(SQL)
 
 def addHistoryData(con, idx, value):
-	con.execute("""INSERT INTO history(idx, data, time) VALUES(?, ?, DATETIME("now") )""", (int(idx), float(value)))
+	con.execute("""INSERT INTO history(idx, data, time) VALUES(?, ?, DATETIME("now", "localtime") )""", (int(idx), float(value)))
 	con.commit()
+
+def getOrAddIdentifiant(con, topic, name="", format=""):
+	c = con.execute("""SELECT idx FROM identifiant WHERE topic=?""", (str(topic), )).fetchone()
+	if c:
+		return int(c["idx"])
+	else:
+		con.execute("""INSERT INTO identifiant(topic, name, format) VALUES(?, ?, ?)""", (str(topic), str(name), str(format)))
+		con.commit()
+		
+		c = con.execute("""SELECT idx FROM identifiant WHERE topic=? LIMIT 1""", (str(topic), )).fetchone()
+		
+		print("Création d'un identifiant: "+str(c["idx"])+" pour "+str(topic))
+		
+		return int(c["idx"])
+		

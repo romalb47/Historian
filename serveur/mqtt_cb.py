@@ -12,13 +12,17 @@ def on_message(client, userdata, message):
 	bdd = userdata.bdd
 	
 	data = json.loads(message.payload.decode())
-	topic = message.topic.split("/")
 	
-	idx = topic[-1]
 	value = data["value"]
 	
-	bdd_helper.addHistoryData(bdd, idx, value)
-	print("Ajout de '" + str(data["value"]) + "' depuis '" + message.topic + "'")
+	idx = bdd_helper.getOrAddIdentifiant(bdd, message.topic, data.get("name", ""), data.get("format", ""))
+	
+	try:
+		bdd_helper.addHistoryData(bdd, idx, value)
+		print("Ajout de '" + str(data["value"]) + "' depuis '" + message.topic + "'")
+	except:
+		print("Erreur d'enregistrement!")
+		return
 
 	
 	

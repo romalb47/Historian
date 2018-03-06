@@ -34,7 +34,7 @@ def main():
 	BDD = bdd_helper.init_bdd(args.sql)
 
 	MQTT = mqtt.Client()
-	#MQTT = mqtt.Client(client_id="historian", clean_session=False)
+	#MQTT = mqtt.Client("historian", False)
 	#MQTT.username_pw_set(username, password=None)
 	#MQTT.reconnect_delay_set(min_delay=1, max_delay=30)
 

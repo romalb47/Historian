@@ -45,7 +45,7 @@ function addData(data) {
 				name: data.name,
 				type: "line",
 				showInLegend: true,
-				yValueFormatString: data.format,
+				yValueFormatString: "#,##%",
 				dataPoints: []
 			} )
 			
@@ -85,10 +85,10 @@ function addEvent(data) {
 
 function RefreshPage() {
 	for (var i in ChartIdx) {
-		$.getJSON("http://127.0.0.1:8080/api/v1/curves/"+ChartIdx[i], addData);
+		$.getJSON("http://127.0.0.1:8080/api/v1/curves/"+ChartIdx[i]+"/data", addData);
 	}
 	for (var i in ChartIde) {
-		$.getJSON("http://127.0.0.1:8080/api/v1/events/"+ChartIde[i], addEvent);
+		$.getJSON("http://127.0.0.1:8080/api/v1/events/"+ChartIde[i]+"/data", addEvent);
 	}
 
 	setTimeout(RefreshPage, 5000); 
@@ -112,7 +112,7 @@ function LoadDataset(data){
 	RefreshPage();
 }
 
-$.getJSON("http://127.0.0.1:8080/api/v1/datasets/10", LoadDataset);
+$.getJSON("http://127.0.0.1:8080/api/v1/datasets/10/data", LoadDataset);
 
 
 }
